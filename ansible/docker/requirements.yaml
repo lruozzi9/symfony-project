@@ -1,0 +1,8 @@
+roles:
+    - name: geerlingguy.postgresql
+    - name: geerlingguy.php-versions
+    - name: geerlingguy.php
+    - name: geerlingguy.apache-php-fpm
+    - name: geerlingguy.php-pgsql
+    - name: geerlingguy.apache
+    - name: geerlingguy.nodejs

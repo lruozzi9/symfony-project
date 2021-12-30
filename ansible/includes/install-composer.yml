@@ -1,0 +1,35 @@
+---
+-
+    name: Check for Composer
+    stat:
+        path: /usr/local/bin/composer
+    register: composer_stat
+
+-
+    name: Download Composer
+    script: scripts/install_composer.sh
+    when: not composer_stat.stat.exists
+
+-
+    name: Move Composer globally
+    become: true
+    command: mv composer.phar /usr/local/bin/composer
+    when: not composer_stat.stat.exists
+
+-
+    name: Set permissions on Composer
+    become: true
+    file:
+        path: /usr/local/bin/composer
+        mode: "a+x"
+    when: not composer_stat.stat.exists
+
+-
+    name: Make sure composer is at its latest version
+    become: true
+    composer:
+        working_dir: "{{ project_root_dir }}"
+        command: self-update
+    when: composer_stat.stat.exists
+    register: composer_self_update
+    changed_when: "not composer_self_update.stdout|regex_search('You are already using the latest available Composer')"

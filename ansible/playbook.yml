@@ -1,0 +1,133 @@
+---
+-
+    hosts: servers
+
+    vars_files:
+        - ./vars/vault.yml
+        - ./vars/vars.yml
+
+    pre_tasks:
+        -
+            name: Update APT package manager repositories cache
+            become: true
+            apt:
+                update_cache: yes
+            changed_when: false
+
+        -
+            name: Upgrade installed packages
+            become: true
+            apt:
+                upgrade: safe # This option requires "aptitude", be sure that is installed on your distro or add it via apt before these command
+
+    tasks:
+        -
+            ping: ~
+
+    tags:
+        - always
+
+# Install and Set Up DataBase
+-
+    hosts: dbservers
+
+    become: yes
+
+    vars_files:
+        - ./vars/vault.yml
+        - ./vars/vars.yml
+
+    roles:
+        - geerlingguy.postgresql
+
+    tags:
+        - database
+
+
+# Install and Set Up Apache and PHP
+-
+    hosts: webservers
+
+    become: yes
+
+    vars_files:
+        - ./vars/vault.yml
+        - ./vars/vars.yml
+
+    roles:
+        - geerlingguy.php-versions
+        - geerlingguy.php
+        - geerlingguy.apache-php-fpm
+        - geerlingguy.php-pgsql
+        - geerlingguy.apache
+
+    tags:
+        - web
+
+
+# Install and Set Up Node JS
+-
+    hosts: webservers
+
+    become: yes
+
+    vars_files:
+        - ./vars/vars.yml
+
+    roles:
+        - geerlingguy.nodejs
+
+    tags:
+        - web
+
+
+-
+    hosts: webservers
+
+    vars_files:
+        - ./vars/vault.yml
+        - ./vars/vars.yml
+
+    tasks:
+        -
+            name: Install low-level utilities
+            become: true
+            apt:
+                name:
+                    - zip
+                    - unzip
+                    - git
+                state: latest
+
+        -
+            name: Remove package cmdtest which confilicts with yarn
+            become: true
+            apt:
+                name: cmdtest
+                state: absent
+
+        -
+            name: Install yarn
+            become: true
+            command: npm install -g yarn
+
+        -
+            name: Create project directory and set its permissions
+            become: true
+            file:
+                path: "{{ project_versions_root }}"
+                state: directory
+                owner: "{{ ansible_user }}"
+                group: "{{ ansible_user }}"
+                recurse: yes
+
+        # Install Composer
+        -
+            import_tasks: ./includes/install-composer.yml
+
+        # Install Symfony CLI
+        -
+            import_tasks: ./includes/install-symfony-cli.yml
+
+    tags:
+        - web

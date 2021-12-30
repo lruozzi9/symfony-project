@@ -1,0 +1,68 @@
+name: Tests
+
+on:
+    push: ~
+    pull_request: ~
+    release:
+        types: [ created ]
+    schedule:
+        - cron: "0 6 * * 0"
+
+jobs:
+    tests:
+        runs-on: ubuntu-latest
+        timeout-minutes: 10
+        steps:
+            -
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: '8.0'
+                    tools: symfony, composer-require-checker, composer-unused
+            -
+                uses: actions/checkout@v2
+            -
+                name: Copy .env.test.local
+                run: php -r "file_exists('.env.test.local') || copy('.env.test', '.env.test.local');"
+            -
+                name: Cache Composer packages
+                id: composer-cache
+                uses: actions/cache@v2
+                with:
+                    path: vendor
+                    key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+                    restore-keys: |
+                        ${{ runner.os }}-php-
+            -
+                name: Install Dependencies
+                run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+            -
+                name: Check composer direct dependencies
+                run: composer-require-checker check
+            #-
+            #    name: Check if dependencies are used
+            #    run: composer-unused
+            -
+                name: Run easy coding standard
+                run: vendor/bin/ecs check src tests spec features/bootstrap
+            -
+                name: Analyse code with phpstan
+                run: vendor/bin/phpstan analyse src tests spec features/bootstrap -l max
+            -
+                name: Analyse code with psalm
+                run: vendor/bin/psalm
+            -
+                name: Create Database
+                run: |
+                    mkdir -p data
+                    touch data/database.sqlite
+            -
+                name: Execute tests (Unit and Feature tests) via PHPUnit
+                env:
+                    DATABASE_URL: sqlite:///%kernel.project_dir%/data/database.sqlite
+                run: vendor/bin/phpunit
+            -
+                name: Execute specification tests via PHPSpec
+                run: vendor/bin/phpspec run
+            -
+                name: Execute behavior tests via behat
+                run: vendor/bin/behat

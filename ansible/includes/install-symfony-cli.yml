@@ -1,0 +1,33 @@
+---
+-
+    name: Check for Symfony CLI
+    stat:
+        path: /usr/local/bin/symfony
+    register: symfony_cli_stat
+
+-
+    name: Download Symfony CLI
+    script: scripts/install_symfony_cli.sh
+    when: not symfony_cli_stat.stat.exists
+
+-
+    name: Move Symfony CLI globally
+    become: true
+    command: mv .symfony/bin/symfony /usr/local/bin/symfony
+    when: not symfony_cli_stat.stat.exists
+
+-
+    name: Set permissions on Symfony CLI
+    become: true
+    file:
+        path: /usr/local/bin/symfony
+        mode: "a+x"
+    when: not symfony_cli_stat.stat.exists
+
+-
+    name: Make sure Symfony CLI is at its latest version
+    become: true
+    command: symfony self-update
+    when: symfony_cli_stat.stat.exists
+    register: symfony_self_update
+    changed_when: "not symfony_self_update.stdout|regex_search('No updates available')"
