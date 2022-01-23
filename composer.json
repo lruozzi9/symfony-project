@@ -28,7 +28,7 @@
     "extra": {
         "symfony": {
             "allow-contrib": false,
-            "require": "^5.4"
+            "require": "^5.4 || ^6.0"
         }
     },
     "license": "proprietary",
@@ -81,6 +81,11 @@
     "require-dev": {
         "behat/behat": "^3.10",
         "easycorp/easy-deploy-bundle": "^1.0",
+        "friends-of-behat/mink-browserkit-driver": "^1.6",
+        "friends-of-behat/mink-debug-extension": "^2.1",
+        "friends-of-behat/mink-extension": "^2.6",
+        "friends-of-behat/page-object-extension": "^0.3.2",
+        "friends-of-behat/symfony-extension": "^2.3",
         "phpspec/phpspec": "^7.1",
         "phpstan/phpstan": "^1.1",
         "phpunit/phpunit": "^9.5",
@@ -88,7 +93,7 @@
         "symfony/browser-kit": "^5.4",
         "symfony/css-selector": "^5.4",
         "symfony/debug-bundle": "^5.4",
-        "symfony/maker-bundle": "^1.0",
+        "symfony/maker-bundle": "^1.36",
         "symfony/phpunit-bridge": "^5.4",
         "symfony/stopwatch": "^5.4",
         "symfony/web-profiler-bundle": "^5.4",
@@ -106,15 +111,20 @@
         "post-update-cmd": [
             "@auto-scripts"
         ],
-        "test": {
-            "ecs": "vendor/bin/ecs check src tests spec features/bootstrap",
-            "phpstan": "vendor/bin/phpstan analyse src tests spec features/bootstrap -l max",
-            "psalm": "vendor/bin/psalm",
-            "spec": "vendor/bin/phpspec run",
-            "unit": "vendor/bin/phpunit",
-            "behat": "vendor/bin/behat",
-            "composer-require-checker": "vendor/bin/composer-require-checker check"
-        }
+        "ecs": "vendor/bin/ecs check src tests spec",
+        "phpstan": "vendor/bin/phpstan analyse src -l max",
+        "psalm": "vendor/bin/psalm",
+        "spec": "vendor/bin/phpspec run",
+        "unit": "vendor/bin/phpunit",
+        "behat": "vendor/bin/behat",
+        "test": [
+            "@ecs",
+            "@phpstan",
+            "@psalm",
+            "@spec",
+            "@unit",
+            "@behat"
+        ]
     },
     "type": "project"
 }

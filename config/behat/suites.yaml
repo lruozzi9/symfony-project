@@ -1,0 +1,5 @@
+default:
+    suites:
+        default:
+            contexts:
+                - App\Tests\Behat\DemoContext

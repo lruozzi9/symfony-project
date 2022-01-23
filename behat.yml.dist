@@ -1,0 +1,22 @@
+imports:
+    - config/behat/suites.yaml
+
+default:
+    extensions:
+        FriendsOfBehat\SymfonyExtension:
+            bootstrap: tests/bootstrap.php
+
+        Behat\MinkExtension:
+            base_url: "https://localhost:8080/"
+            sessions:
+                symfony:
+                    symfony: ~
+
+        FriendsOfBehat\MinkDebugExtension:
+            directory: "%paths.base%/var/behat/"
+            screenshot: true
+            clean_start: true
+
+    gherkin:
+        filters:
+            tags: '~@wip'
