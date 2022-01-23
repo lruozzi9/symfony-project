@@ -82,12 +82,13 @@ jobs:
             -
                 name: Analyse code with psalm
                 run: vendor/bin/psalm
-            -
-                name: Update Database Schema
-                run: php bin/console doctrine:migrations:migrate
-            -
-                name: Validate database schema
-                run: php bin/console doctrine:schema:validate
+# Uncomment these lines when added some migrations or table
+#            -
+#                name: Update Database Schema
+#                run: php bin/console doctrine:migrations:migrate
+#            -
+#                name: Validate database schema
+#                run: php bin/console doctrine:schema:validate
             -
                 name: Execute tests (Unit and Feature tests) via PHPUnit
                 run: vendor/bin/phpunit
